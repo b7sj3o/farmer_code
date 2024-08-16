@@ -1,0 +1,1 @@
+IMG_BLOCK = "assets/images/dirt.png"
