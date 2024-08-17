@@ -1,10 +1,15 @@
 from pydantic import BaseModel
 
 
-class ConfirmRequest(BaseModel):
+class CheckUserUsername(BaseModel):
+    username: str
+
+
+class CheckUserChatID(BaseModel):
     chat_id: int
 
 
 class UserCreate(BaseModel):
     chat_id: int
     username: str
+

@@ -1,128 +1,79 @@
 import pygame
-import os
+import sys
+import requests
 
 from config import *
 
 
-pygame.init()
-screen = pygame.display.set_mode(SIZE)
-pygame.display.set_caption("Farmer code")
  
- 
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode(SIZE)
+    pygame.display.set_caption("Farmer code")
 
-class main():
     running = True
+    base_font = pygame.font.Font(None, 32) 
     clock = pygame.time.Clock()
-    x, y = 200, 200
-    img = pygame.image.load(IMG_BLOCK)
+    user_text = '' 
+    # img = pygame.image.load(IMG_BLOCK)
+
+    input_rect = pygame.Rect(200, 200, 140, 32) 
+
+    color_active = pygame.Color('lightskyblue3') 
+    color_passive = pygame.Color('chartreuse4') 
+    color = color_passive 
+
+    active = False
+
     
     while running:
-        screen.fill(WHITE)
+        screen.fill(BLACK)
 
-
-        clock.tick(60)
-
-        screen.blit(img, (0, 0))
+        # screen.blit(img, (0, 0))
 
         for event in pygame.event.get():
+            if event.type == pygame.QUIT: 
+                pygame.quit() 
+                sys.exit()
+                running = False
+            
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    pygame.quit() 
+                    sys.exit()
                     running = False
 
-        pygame.display.flip()
-        
+            if event.type == pygame.MOUSEBUTTONDOWN: 
+                if input_rect.collidepoint(event.pos): 
+                    active = True
+                else: 
+                    active = False
             
- 
-# Close the window and quit.
-pygame.quit()
+            if event.type == pygame.KEYDOWN: 
+                if event.key == pygame.K_BACKSPACE: 
+                    user_text = user_text[:-1] 
 
-
-
-
-# # import sys module 
-# import pygame 
-# import sys 
-  
-  
-# # pygame.init() will initialize all 
-# # imported module 
-# pygame.init() 
-  
-# clock = pygame.time.Clock() 
-  
-# # it will display on screen 
-# screen = pygame.display.set_mode([600, 500]) 
-  
-# # basic font for user typed 
-# base_font = pygame.font.Font(None, 32) 
-# user_text = '' 
-  
-# # create rectangle 
-# input_rect = pygame.Rect(200, 200, 140, 32) 
-  
-# # color_active stores color(lightskyblue3) which 
-# # gets active when input box is clicked by user 
-# color_active = pygame.Color('lightskyblue3') 
-  
-# # color_passive store color(chartreuse4) which is 
-# # color of input box. 
-# color_passive = pygame.Color('chartreuse4') 
-# color = color_passive 
-  
-# active = False
-  
-# while True: 
-#     for event in pygame.event.get(): 
-  
-#       # if user types QUIT then the screen will close 
-#         if event.type == pygame.QUIT: 
-#             pygame.quit() 
-#             sys.exit() 
-  
-#         if event.type == pygame.MOUSEBUTTONDOWN: 
-#             if input_rect.collidepoint(event.pos): 
-#                 active = True
-#             else: 
-#                 active = False
-
-#         if event.type == pygame.KEYDOWN: 
-      
-#             if event.key == pygame.K_BACKSPACE: 
-#                 user_text = user_text[:-1] 
-
-#             elif event.key == pygame.K_RETURN:
-#                 print("HELLO WORLD")
-            
-#             elif event.unicode.isalnum() or event.unicode in ["_"]: 
-#                 user_text += event.unicode
-  
+                elif event.key == pygame.K_RETURN:
+                    response = requests.post(FASTAPI_URL_LOGIN, json={
+                        "username": user_text
+                    })
                 
+                elif event.unicode.isalnum() or event.unicode in ["_"]: 
+                    user_text += event.unicode
 
-#     # it will set background color of screen 
-#     screen.fill((255, 255, 255)) 
-  
-#     if active: 
-#         color = color_active 
-#     else: 
-#         color = color_passive 
-          
-#     # draw rectangle and argument passed which should 
-#     # be on screen 
-#     pygame.draw.rect(screen, color, input_rect) 
-  
-#     text_surface = base_font.render(user_text, True, (255, 255, 255)) 
-      
-#     # render at position stated in arguments 
-#     screen.blit(text_surface, (input_rect.x+5, input_rect.y+5)) 
-      
-#     # set width of textfield so that text cannot get 
-#     # outside of user's text input 
-#     input_rect.w = max(100, text_surface.get_width()+10) 
-      
-#     # display.flip() will update only a portion of the 
-#     # screen to updated, not full area 
-#     pygame.display.flip() 
-      
-#     # clock.tick(60) means that for every second at most 
-#     # 60 frames should be passed. 
-#     clock.tick(60) 
+
+        if active: 
+            color = color_active 
+        else: 
+            color = color_passive     
+
+        pygame.draw.rect(screen, color, input_rect)
+
+        text_surface = base_font.render(user_text, True, (255, 255, 255)) 
+
+        screen.blit(text_surface, (input_rect.x+5, input_rect.y+5)) 
+    
+        input_rect.w = max(100, text_surface.get_width()+10) 
+
+        pygame.display.flip()
+ 

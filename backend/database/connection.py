@@ -6,7 +6,6 @@ engine = create_engine("sqlite:///my_db.sqlite")
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-
 class Base(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -15,5 +14,4 @@ class Base(DeclarativeBase):
     def __tablename__(cls):
         return f"{cls.__name__.lower()}s"
 
-Base.metadata.create_all(bind=engine)
     
