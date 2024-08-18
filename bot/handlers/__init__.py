@@ -1,2 +1,3 @@
 from .register import register, register_username
-from .login import bot_login_confirmation
+from .login import handle_callback_query
+from .home import home

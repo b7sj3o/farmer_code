@@ -14,7 +14,8 @@ def main():
     running = True
     base_font = pygame.font.Font(None, 32) 
     clock = pygame.time.Clock()
-    user_text = '' 
+    user_text = ""
+    username = ""
     # img = pygame.image.load(IMG_BLOCK)
 
     input_rect = pygame.Rect(200, 200, 140, 32) 
@@ -22,7 +23,7 @@ def main():
     color_active = pygame.Color('lightskyblue3') 
     color_passive = pygame.Color('chartreuse4') 
     color = color_passive 
-
+    response = None
     active = False
 
     
@@ -54,13 +55,28 @@ def main():
                     user_text = user_text[:-1] 
 
                 elif event.key == pygame.K_RETURN:
+                    username = user_text
                     response = requests.post(FASTAPI_URL_LOGIN, json={
                         "username": user_text
                     })
+                    user_text = response.json().get("message")
                 
                 elif event.unicode.isalnum() or event.unicode in ["_"]: 
                     user_text += event.unicode
 
+
+        if response:
+            response = requests.get(FASTAPI_URL_GET_USER, params={
+                "username": username
+            })
+            js = response.json()
+            print(js)
+            if js.get("status_code") == 404:
+                user_text = js.get("detail").get("message")
+            elif js.get("username") == username:
+                user = response.json()
+                user_text = "Loginned sucessfully"
+                response = None
 
         if active: 
             color = color_active 

@@ -13,3 +13,8 @@ class UserCreate(BaseModel):
     chat_id: int
     username: str
 
+
+class LoginResponse(BaseModel):
+    chat_id: int
+    success: bool
+

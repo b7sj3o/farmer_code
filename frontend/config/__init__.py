@@ -1,3 +1,3 @@
 from .colors import *
 from .sizes import *
-from .paths import *
+from .urls import *

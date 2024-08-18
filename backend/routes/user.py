@@ -1,20 +1,15 @@
 import requests
 from fastapi import HTTPException
+from telebot import types
+from typing import Optional
 
 from database.models.user import User
 from database.connection import Session
 from app import app
-from config import UserCreate, CheckUserChatID, CheckUserUsername, BOT_URL_VERIFICATION_LOGIN
+from config.pydantic_models import UserCreate, CheckUserChatID, CheckUserUsername, LoginResponse
+from config.urls import TOKEN, TELEGRAM_API
+from utils.user import send_confirmation, get_username_by_chat_id
 
-@app.get("/")
-def home():
-    response = requests.post(
-        BOT_URL_VERIFICATION_LOGIN,
-        json={
-            "chat_id": 928132950
-        }
-    )
-    print(response)
 
 @app.post("/existing_user")
 def existing_user(user: CheckUserChatID):
@@ -33,6 +28,23 @@ def existing_user(user: CheckUserChatID):
         }
 
 
+@app.post("/register")
+def register_user(user: UserCreate):
+    with Session() as db:
+        if existing_user(user):
+            new_user = User(
+                chat_id=user.chat_id,
+                username=user.username,
+            )
+            print(type(new_user))
+
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+
+            return {"message": "User has been registred successfully"}
+
+
 @app.post("/login_user")
 def login_user(user: CheckUserUsername):
     with Session() as db:
@@ -43,16 +55,30 @@ def login_user(user: CheckUserUsername):
                 "success": False
             })
 
-        chat_id = user.chat_id
-        response = requests.post()
-        if response:
-            user.authenticated = True
-            db.commit()
-        
-            return {
-                "message": "Login confirmed",
+
+        send_confirmation(user)
+        telegram_username = get_username_by_chat_id(user.chat_id)
+
+
+        return {
+                "message": f"Confirmation sent to telegram: @{telegram_username}",
                 "success": True
             }
+
+
+@app.post("/login_response")
+def login_response(data: LoginResponse):
+    with Session() as db:
+        user = db.query(User).filter(User.chat_id == data.chat_id).first() # TODO: create func find_user() in utils
+    
+        if data.success:
+                user.authenticated = True
+                db.commit()
+            
+                return {
+                    "message": "Login confirmed",
+                    "success": True
+                }
         else:
             return {
                 "message": "Confirmation failed",
@@ -60,19 +86,16 @@ def login_user(user: CheckUserUsername):
             }
 
 
-@app.post("/register")
-def register_user(user: UserCreate):
+@app.get("/get_user")
+def get_user(username: str):
     with Session() as db:
-        if existing_user(user):
-            new_user = User(
-                chat_id=user.chat_id,
-                username=user.username,
-            )
+        user = db.query(User).filter(User.username == username).first()
 
-            db.add(new_user)
-            db.commit()
-            db.refresh(new_user)
-
-            return {"message": "User has been registred successfully"}
-        
+        if user and user.authenticated:
+            return user
+        else:
+            if not user:
+                return HTTPException(status_code=404, detail={"message": "User not found"})
+            else:
+                return HTTPException(status_code=401, detail={"message": "User not confirmed"})
 

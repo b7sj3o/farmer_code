@@ -1,22 +1,9 @@
-import telebot
-import os
-import requests
-
 from config import bot
-from handlers.register import register, register_username
+from handlers import *
 
 
-
-# def register_handlers():
-#     bot.register_message_handler(register, commands=["register"])
-#     bot.register_message_handler(register_username)
-
-
-def run():
-    # register_handlers()
+if __name__ == "__main__":
+    print("Running bot...")
     bot.infinity_polling()
-
-
-run()
 
 
