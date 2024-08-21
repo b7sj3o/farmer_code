@@ -1,5 +1,5 @@
 import requests
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 from telebot import types
 from typing import Optional
 
@@ -36,7 +36,6 @@ def register_user(user: UserCreate):
                 chat_id=user.chat_id,
                 username=user.username,
             )
-            print(type(new_user))
 
             db.add(new_user)
             db.commit()
@@ -50,10 +49,10 @@ def login_user(user: CheckUserUsername):
     with Session() as db:
         user = db.query(User).filter(User.username == user.username).first()
         if not user:
-            return HTTPException(status_code=404, detail={
+            return {
                 "message": "User not found",
                 "success": False
-            })
+            }
 
 
         send_confirmation(user)
@@ -70,7 +69,7 @@ def login_user(user: CheckUserUsername):
 def login_response(data: LoginResponse):
     with Session() as db:
         user = db.query(User).filter(User.chat_id == data.chat_id).first() # TODO: create func find_user() in utils
-    
+        user.responsed = True
         if data.success:
                 user.authenticated = True
                 db.commit()
@@ -91,11 +90,11 @@ def get_user(username: str):
     with Session() as db:
         user = db.query(User).filter(User.username == username).first()
 
-        if user and user.authenticated:
-            return user
-        else:
-            if not user:
-                return HTTPException(status_code=404, detail={"message": "User not found"})
-            else:
-                return HTTPException(status_code=401, detail={"message": "User not confirmed"})
+        if user and user.responsed:
+            if user.authenticated:
+                return {"message": "User Loginned successfully", "status_code": 200}
+            elif not user.confirmed:
+                return {"message": "User not confirmed", "status_code": 401}
 
+        elif not user:
+            return {"message": "User not found", "status_code": 404}

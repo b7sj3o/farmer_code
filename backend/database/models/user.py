@@ -10,4 +10,5 @@ class User(Base):
     chat_id: Mapped[int]
     username: Mapped[str]
     authenticated: Mapped[bool] = mapped_column(default=False)
+    responsed: Mapped[bool] = mapped_column(default=False)
     # resourses: Mapped[dict[str, Any]]

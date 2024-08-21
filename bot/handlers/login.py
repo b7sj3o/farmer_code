@@ -8,7 +8,6 @@ button_cancel_text = "This is not me ❌"
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback_query(call):
-    print(f"{call=}")
     if call.data == "confirm":
         response = requests.post(FASTAPI_URL_LOGIN_RESPONSE, json={
             "success": True,

@@ -1,5 +1,6 @@
-from ui import manage
+from src.main import Main
 
 
 if __name__ == "__main__":
-    manage.main()
+    main = Main()
+    main.run()
