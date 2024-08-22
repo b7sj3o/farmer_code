@@ -3,11 +3,10 @@ import sys
 import requests
 
 from config import *
-from .auth import Auth
 from .game import Game
 
 
-class Main:
+class Main: # TODO: reorganize structure
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Farmer code")

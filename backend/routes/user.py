@@ -54,6 +54,10 @@ def login_user(user: CheckUserUsername):
                 "success": False
             }
 
+        if user.authenticated:
+            return {
+                "user": user
+            }
 
         send_confirmation(user)
         telegram_username = get_username_by_chat_id(user.chat_id)
@@ -92,7 +96,7 @@ def get_user(username: str):
 
         if user and user.responsed:
             if user.authenticated:
-                return {"message": "User Loginned successfully", "status_code": 200}
+                return {"message": "User Loginned successfully", "status_code": 200, "user": user}
             elif not user.confirmed:
                 return {"message": "User not confirmed", "status_code": 401}
 
