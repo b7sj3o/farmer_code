@@ -21,6 +21,8 @@ source .venv/bin/activate</code></pre>
         <li>Встановіть залежності:
             <pre><code>pip install -r requirements.txt</code></pre>
         </li>
+        <li>Створіть файл .env згідно .env.example:
+        </li>
         <li>Запустіть програму:
             <pre><code>python main.py</code></pre>
         </li>
@@ -42,6 +44,3 @@ source .venv/bin/activate</code></pre>
     <li><code>get_pos_y()</code>: Повертає координату робота по осі Y.</li>
     <li><code>plant(plant_type)</code>: Посаджує рослину (наразі підтримується тільки <code>Wheat</code>).</li>
 </ul>
-
-<h2>Опис</h2>
-<p><strong>Farmer Code</strong> є адаптацією гри "The farmer was replaced". Гра ще не завершена і має ряд недоліків, оскільки не була повністю переписана з spaghetti code.</p>
