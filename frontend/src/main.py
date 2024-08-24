@@ -6,12 +6,13 @@ from config import *
 from .game import Game
 
 
-class Main: # TODO: reorganize structure
+class Main: # TODO: reorganize  structure
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Farmer code")
         self.surface = pygame.display.set_mode(SIZE)
         self.game = Game()
+        self.clock = pygame.time.Clock()
 
 
     def handle_events(self):
@@ -30,9 +31,10 @@ class Main: # TODO: reorganize structure
     def run(self):
         while True:
             self.surface.fill(BACKGROUND_COLOR)
-
             self.handle_events()
             self.game.update()
             self.game.render(self.surface)
+
+            self.clock.tick(60)
             
             pygame.display.flip()

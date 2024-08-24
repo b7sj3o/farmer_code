@@ -2,7 +2,7 @@ import pygame
 from .auth_page import AuthPage
 from .compiler import Compiler
 from .main_page import MainPage
-
+import json
 
 class Game:
     def __init__(self):
@@ -25,10 +25,17 @@ class Game:
 
 
     def check_for_auth(self):
+        response = self.current_page.response
         try:
-            return self.current_page.response.json().get("user").get("authenticated")
+            if response.json().get("user").get("authenticated"):
+                with open("data.json", "w", encoding="utf-8") as f:
+                    json.dump(response.json().get("user"), f, indent=4)
+
+                return True
+            else:
+                return False
         except:
             ...
 
     def change_page(self):
-        self.current_page = Compiler()
+        self.current_page = MainPage()

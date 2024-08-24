@@ -18,3 +18,8 @@ class LoginResponse(BaseModel):
     chat_id: int
     success: bool
 
+
+class HarvestResources(BaseModel):
+    username: str
+    resource: str
+    resource_amount: int

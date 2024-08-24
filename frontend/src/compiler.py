@@ -3,15 +3,14 @@ import pygame
 import pyperclip
 from config import *
 from .blanks import GUIBlanks
-from .executor import executor
+from .executor import Executor
+import threading
 
 class Compiler:
     def __init__(self, x, y, parent):
         self.x = x
         self.y = y
-        self.parent = parent
-
-        
+        self.executor = Executor(parent)
         self.blanks = GUIBlanks()
         self.lines = [""]
         self.code = {
@@ -20,17 +19,22 @@ class Compiler:
         }
         self.cursor_position = 0
         self.active_input = False
-
         self.last_line_tabs = 0
-
         self.create_elements()
-
         self.rect = self.blanks.compiler_rect
-
+        # self.executor_thread = threading.Thread(target=self.executor.execute)
+        # self.executor_thread.start()
+        # self.console_rect = None
+        # self.create_console()
         
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN: 
-            self.active_input = self.blanks.compiler_rect.collidepoint(event.pos)           
+            self.active_input = self.blanks.compiler_rect.collidepoint(event.pos)   
+
+            if self.blanks.compiler_start_rect.collidepoint(event.pos):
+                self.start_execution()
+            elif self.blanks.compiler_stop_rect.collidepoint(event.pos):
+                self.stop_execution()
 
         elif ( event.type == pygame.KEYDOWN ) and self.active_input: 
             # remove char || previous line
@@ -46,11 +50,11 @@ class Compiler:
                 self.next_line()
             
             # Ctrl + [key]
-            elif pygame.key.get_mods() & pygame.KMOD_CTRL:
-                if event.key == pygame.K_s:
-                    self.execute_code()
-                elif event.key == pygame.K_v:
-                    self.code["text"] += pyperclip.paste()
+            # elif pygame.key.get_mods() & pygame.KMOD_CTRL:
+            #     if event.key == pygame.K_s:
+            #         self.execute_code()
+            #     elif event.key == pygame.K_v:
+            #         self.code["text"] += pyperclip.paste()
 
             # move curson among the code
             elif event.key == pygame.K_LEFT:
@@ -89,6 +93,8 @@ class Compiler:
             lines=self.lines
         )
 
+        # pygame.draw.rect(surface, BLACK, self.console_rect, 2)
+
 
     def create_elements(self):
         self.blanks.create_compiler(
@@ -98,12 +104,14 @@ class Compiler:
             height=COMPILER_HEIGHT
         )
 
-        self.blanks.create_cursor(
-            x=0,
-            y=0,
-            width=3
-        )
-        
+    
+    # def create_console(self):
+    #     console_x = self.x
+    #     console_y = self.y + COMPILER_HEIGHT
+
+    #     self.console_rect = pygame.Rect(console_x, console_y, COMPILER_WIDTH, COMPILER_HEIGHT//2)
+    #     self.blanks.create_const_text("Output", self.console_rect.x + 50, self.console_rect.y + 20, font_size=30)
+
 
     def next_line(self):
         text = self.code["text"]
@@ -165,26 +173,22 @@ class Compiler:
                 self.cursor_position = min(self.cursor_position, len(self.lines[new_line - 1]))
 
 
-    def execute_code(self):
+    def start_execution(self):
         code_to_execute = """"""
-        for i in self.lines:
-            code_to_execute += i
+        for line in self.lines:
+            code_to_execute += line
             code_to_execute += "\n"
+            if "while" in line or "for" in line:
+                line_tabs = len(line) - len(line.lstrip())
+                code_to_execute += "{}update_locals()".format(" "*(line_tabs + SPACES)) + "\n"
 
-        try:
-            executor(code_to_execute, self.parent)
-        except Exception as ex:
-            print(f"Error: {ex}")
-
-    def paste_text(self):
-        # Get text from the clipboard
-        clipboard_text = pygame.scrap.get(pygame.SCRAP_TEXT)
+        self.executor.code = code_to_execute
         
-        if clipboard_text:
-            clipboard_text = clipboard_text.decode('utf-8')  # Decode the text to utf-8
-            # Insert the text at the current cursor position
-            self.code["text"] = self.code["text"][:self.cursor_position] + clipboard_text + self.code["text"][self.cursor_position:]
-            # Move the cursor position forward by the length of the inserted text
-            self.cursor_position += len(clipboard_text)
-            # Update the current line in the lines array
-            self.lines[self.code["line"]-1] = self.code["text"]
+        self.executor_thread = threading.Thread(target=self.executor.execute)
+        self.executor_thread.start()
+        
+
+
+    def stop_execution(self):
+        # self.executor.stop_execution()
+        ...

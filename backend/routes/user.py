@@ -2,11 +2,12 @@ import requests
 from fastapi import HTTPException, Response
 from telebot import types
 from typing import Optional
+from sqlalchemy import update
 
 from database.models.user import User
 from database.connection import Session
 from app import app
-from config.pydantic_models import UserCreate, CheckUserChatID, CheckUserUsername, LoginResponse
+from config.pydantic_models import UserCreate, CheckUserChatID, CheckUserUsername, LoginResponse, HarvestResources
 from config.urls import TOKEN, TELEGRAM_API
 from utils.user import send_confirmation, get_username_by_chat_id
 
@@ -102,3 +103,23 @@ def get_user(username: str):
 
         elif not user:
             return {"message": "User not found", "status_code": 404}
+
+@app.post("/harvest_resources")
+def harvest_resources(data: HarvestResources):
+    with Session() as db:
+        user = db.query(User).filter(User.username == data.username).first()
+
+        try:
+            user.resources[data.resource] += data.resource_amount
+        except:
+            user.resources[data.resource] = data.resource_amount
+
+        db.execute(
+                update(User).
+                where(User.username == data.username).
+                values(resources=user.resources)
+            )
+        db.commit()
+        db.refresh(user)
+
+        print(user.resources)

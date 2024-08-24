@@ -1,7 +1,7 @@
 import logging
 
 
-def main() -> None:
+def logger(): # Doesn't work yet
     logging.basicConfig(filename="basic.log")
 
     logging.debug("DEBUG message")
@@ -12,4 +12,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    logger()
