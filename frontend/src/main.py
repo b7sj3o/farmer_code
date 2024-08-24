@@ -1,6 +1,5 @@
 import pygame
 import sys
-import requests
 
 from config import *
 from .game import Game
