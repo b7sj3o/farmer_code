@@ -3,4 +3,4 @@
 *pycache*
 *.db*
 *.sqlite*
-*data.json*
+data.json

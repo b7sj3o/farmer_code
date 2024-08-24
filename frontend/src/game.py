@@ -6,7 +6,7 @@ import json
 
 class Game:
     def __init__(self):
-        self.current_page = MainPage()
+        self.current_page = AuthPage()
 
     
     def handle_event(self, event):
